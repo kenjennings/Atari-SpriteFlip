@@ -18,16 +18,14 @@ The image (text) data describes overlapping Atari Player/Missile graphics to gen
  - (1) for Player 0 bit, -
  - (2) for Player 1 bit, and
  - (3) for overlap of Player 0 and Player 1.
- 
-At this time Player data is only 8 bits per line.
-Any characters other than the characters described will be discarded.
-More than 8 usable bytes will be discarded.
-A short line of data will be padded with zeros to the right.
-An outright empty line (no convertible characters) will be ignored.
 
-Up to 256 lines of data may be provided.
-The program will ignore further data.
-But, why would you do this?
+The Rules:
+- At this time Player data is only 8 bits per line.
+- Any characters other than the characters described will be discarded.
+- More than 8 usable bytes will be discarded.
+- A short line of data will be padded with zeros to the right.
+- An outright empty line (no convertible characters) will be ignored.
+- Up to 256 lines of data may be provided. The program will ignore further data. But, why would you do this?
 
 Maybe in some distant future . . . 
 - Expand to allow 10 bits to include the missiles in the image.
