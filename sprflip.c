@@ -47,6 +47,7 @@
  * The block above will be output for each orientation.
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -68,7 +69,7 @@ int dumpPMbits(char * data,    /* String of pixels */
 
 	if (!data || !onebits || (order < 0) || (order > 1) )
 	{
-		fprintf(stderr, "dumpPMbits() bad args\n");
+		fprintf(stderr, "sprflip: dumpPMbits() bad args\n");
 		return -1;
 	}
 
@@ -215,10 +216,36 @@ int main( int argc, char ** argv )
 	int  len      = 0 ; /* length of the current line being read.*/
 	char * c;
 	char * s;
+	char * directs = NULL;
+	char * defdir = "n";
+	char   opt;
 
+
+	while ( (opt = getopt(argc, argv, "d:") ) != -1) 
+	{
+		switch (opt) 
+		{
+			case 'd':
+				directs = optarg;
+				break;
+				   
+			default: /* '?' */
+				fprintf(stderr, 
+					"Usage: %s [-d nhv]\n\nn = Normal (default)\nh = Horizontal flip\nv = Vertical flip\n\n",
+					argv[0] );
+				exit(EXIT_FAILURE);
+		}
+	}
+	
+	if ( ! directs )
+		directs = defdir;
+	
 	while ( (c = (char *)fgets( line, 256, stdin ) ) && (numLines < 256) )
 	{
 		line[256] = '\0';  /* Force end of string just in case.  I'm lazy. */
+
+		if ( line[0] == '#' ) /* Ignore commented line */
+			continue;
 
 		s = c;
 
@@ -232,27 +259,36 @@ int main( int argc, char ** argv )
 
 		*c = '\0';                    /* Force end of string here. */
 
-		strncat(line, "........", 8); /* Force padding in line to at least length 8 */
+		if ( !strlen(line) ) /* no data to process. skip it */
+		{
+			fprintf(stderr, "sprflip: No usable data read at line %d. Skipping...\n",numLines+1);
+			continue;
+		}
 
-		if ( strlen(line) > 8 )       /* Is string length longer than 8, then force end of string */
-			line[8] = '\0';
+		strncat(line, ".......", 8); /* Force padding in line to at least length 8 */
+
+		line[8] = '\0';  /* force end of string */
 
 		strcpy( spr[numLines++], line ); /* Copy line to sprite data array. */ 
 	}
 
 	if ( !numLines )
 	{
-		fprintf(stderr, "No Lines Read\n" );
+		fprintf(stderr, "sprflip: No Lines Read\n" );
 		exit(0);
 	}
 
-	dumpLines(spr,0,numLines,0); /* data, start, end++, left to right pixel order) */
+	if ( strchr(directs,'n') ) 
+		dumpLines(spr,0,numLines,0); /* data, start, end++, left to right pixel order) */
 
-	dumpLines(spr,0,numLines,1); /* data, start, end++, right to left pixel order) */
+	if ( strchr( directs, 'h') && !(strchr( directs, 'v') ) )
+		dumpLines(spr,0,numLines,1); /* data, start, end++, right to left pixel order) */
 
-	dumpLines(spr,numLines-1,-1,0); /* data, start, end--, left to right pixel order) */
-
-	dumpLines(spr,numLines-1,-1,1); /* data, start, end--, right to left pixel order) */
+	if ( !strchr( directs, 'h') && (strchr( directs, 'v') ) )
+		dumpLines(spr,numLines-1,-1,0); /* data, start, end--, left to right pixel order) */
+	
+	if ( strchr( directs, 'h') && (strchr( directs, 'v') ) )
+		dumpLines(spr,numLines-1,-1,1); /* data, start, end--, right to left pixel order) */
 
 	return 0;
 }
