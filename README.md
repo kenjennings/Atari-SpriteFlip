@@ -50,6 +50,9 @@ The output will resemble:
  
    .by %00011001
 ```
-The block above will be output for each orientation. (Horizontally mirrored, vertically mirrored, and horizontally+vertically mirrored.
+The block above will be output for each orientation. Use command line option -d to choose output.  
+* -d n == Normal output.
+* -d h == Horizontally mirrored.
+* -d v == vertically mirrored.
 
 ---
